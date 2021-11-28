@@ -1,0 +1,51 @@
+server:
+  port: 9191
+spring:  
+    application:    
+      name: API-GATEWAY
+    cloud:
+      gateway:
+        routes:
+        - id: MASTERDATA-SERVICE
+          uri: lb://MASTERDATA-SERVICE
+          predicates:
+          - Path=/olx/masterdata/**
+        - id: ADVERTISE-SERVICE
+          uri: lb://ADVERTISE-SERVICE
+          predicates:
+          - Path=/olx/olxadvertise/**
+        - id: ADVERTISE-SERVICE
+          uri: lb://AUTH-SERVICE
+          predicates:
+          - Path=/olx/user/**
+          
+    zipkin:
+     base-url: http://localhost:9411 
+    
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    
+  instance:
+    hostname: localhost
+
+#server:
+#  port: 9191
+#  
+#spring:
+#    application:
+#      name: API-GATEWAY
+#    cloud:
+#      gateway:#        routes:#        - id: MASTERDATA-SERVICE
+#          uri: lb://MASTERDATA-SERVICE
+#          predicates:
+#          - Path=/olx/masterdata/**#        - id: ADVERTISE-SERVICE
+#          uri: lb://ADVERTISE-SERVICE
+#          predicates:
+#           - Path=/olx/advertise/**             
+#      
+#eureka:
+#  client:
+#     register-with-eureka: true
+#     fetch-registry: true      
