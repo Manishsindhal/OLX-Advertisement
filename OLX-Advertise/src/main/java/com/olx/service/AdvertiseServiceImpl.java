@@ -7,9 +7,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +29,7 @@ import com.olx.exception.InvalidCategoryIdExeption;
 import com.olx.exception.InvalidRecordNoExeption;
 import com.olx.exception.InvalidStatusIdExeption;
 import com.olx.repo.AdvertiseRepo;
+import com.olx.utility.AdveriseData;
 
 @Service(value = "JPA_SERVICE")
 public class AdvertiseServiceImpl implements AdvertiseService {
@@ -36,6 +45,12 @@ public class AdvertiseServiceImpl implements AdvertiseService {
 
 	@Autowired
 	LoginDelegate loginDelegate;
+
+	@Autowired
+	EntityManager entityManager;
+	
+	@Autowired
+	AdveriseData adveriseData;
 
 	private boolean isValidAuthToken(String authToken) {
 		ResponseEntity<Boolean> isValidToken = loginDelegate.validateToken(authToken);
@@ -99,15 +114,31 @@ public class AdvertiseServiceImpl implements AdvertiseService {
 	}
 
 	@Override
-	public Collection<Advertisement> getAllAdvertisement(String authToken) {
+	public ResponseEntity<AdveriseData> getAllAdvertisement(String authToken) {
 		// return advertiseMap.values();
 		if (isValidAuthToken(authToken)) {
 			List<AdvertisementEntity> advertiseEntities = advertiseRepo.findAll();
-			return getAdvertiseDtoList(advertiseEntities);
+			return getAdvertiseDtoList_1(advertiseEntities);
 		} else {
 			throw new InvalidAuthTokenExeption();
 		}
 	}
+	
+	private ResponseEntity<AdveriseData> getAdvertiseDtoList_1(List<AdvertisementEntity> advertiseEntitiesList) {
+		List<Advertisement> advertiseDtoList = new ArrayList<Advertisement>();
+		for (AdvertisementEntity advertiseEntity : advertiseEntitiesList) {
+			Advertisement advertiseDto = this.modelMapper.map(advertiseEntity, Advertisement.class);
+			advertiseDtoList.add(advertiseDto);
+			adveriseData.setAdvertise(advertiseDtoList);
+			
+		}
+		if (advertiseDtoList.size() == 0)
+			throw new InvalidRecordNoExeption();
+		else
+			return new ResponseEntity<AdveriseData>(adveriseData, HttpStatus.OK);
+			//return advertiseDtoList;
+	}
+	
 
 	private List<Advertisement> getAdvertiseDtoList(List<AdvertisementEntity> advertiseEntitiesList) {
 		List<Advertisement> advertiseDtoList = new ArrayList<Advertisement>();
@@ -163,14 +194,59 @@ public class AdvertiseServiceImpl implements AdvertiseService {
 		}
 	}
 
-	@Override
-	public List<Advertisement> searchAdvertiseByFiltercriteria(String searchText, int categoryId, String username,
-			String dateCondition, LocalDate onDate, LocalDate fromDate, LocalDate toDate, String sortBy, int startIndex,
-			int records) {
-		List<AdvertisementEntity> advertiseEntitiesList = advertiseRepo.findAll();
-		return getAdvertiseDtoListForFilterCriteria(advertiseEntitiesList, searchText, categoryId, username,
-				dateCondition, onDate, fromDate, toDate, sortBy, startIndex, records);
+//	@Override
+//	public List<Advertisement> searchAdvertiseByFiltercriteria(String searchText, int categoryId, String username,
+//			String dateCondition, LocalDate onDate, LocalDate fromDate, LocalDate toDate, String sortBy, int startIndex,
+//			int records) {
+//		List<AdvertisementEntity> advertiseEntitiesList = advertiseRepo.findAll();
+//		return getAdvertiseDtoListForFilterCriteria(advertiseEntitiesList, searchText, categoryId, username,
+//				dateCondition, onDate, fromDate, toDate, sortBy, startIndex, records);
+//
+//	}
 
+	@Override
+	public ResponseEntity<AdveriseData> searchAdvertiseByFiltercriteria(String searchText, int categoryId, String postedBy,
+			String dateCondition, LocalDate onDate, LocalDate fromDate, LocalDate toDate, String sortedBy,
+			int startIndex, int records) {
+		// call MasterData service getAllCategories() - RestTemplate
+		// List<Map> categoriesList = masterDataDelegate.getAllCategories();
+		List<Advertisement> advertiseDtoList = new ArrayList<Advertisement>();
+		if (isCategoryExist(categoryId)) {
+			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+			CriteriaQuery<AdvertisementEntity> criteriaQuery = criteriaBuilder.createQuery(AdvertisementEntity.class);
+			Root<AdvertisementEntity> rootEntity = criteriaQuery.from(AdvertisementEntity.class);
+
+			Predicate titlePredicate = criteriaBuilder.like(rootEntity.get("title"), "%" + searchText + "%"); // title=searchText
+			Predicate categoryPredicate = criteriaBuilder.equal(rootEntity.get("category"), categoryId);
+			Predicate postedByPredicate = criteriaBuilder.equal(rootEntity.get("postedBy"), postedBy);
+
+			Predicate dateCondationPredicate = null;
+			if (dateCondition.equalsIgnoreCase("Between")) {
+				dateCondationPredicate = criteriaBuilder.between(rootEntity.get("createdDate"), fromDate, toDate);
+			} else if (dateCondition.equalsIgnoreCase("lessthan")) {
+				dateCondationPredicate = criteriaBuilder.lessThan(rootEntity.get("createdDate"), fromDate);
+			} else if (dateCondition.equalsIgnoreCase("greaterThan")) {
+				dateCondationPredicate = criteriaBuilder.greaterThan(rootEntity.get("createdDate"), fromDate);
+			} else if (dateCondition.equalsIgnoreCase("equals")) {
+				dateCondationPredicate = criteriaBuilder.greaterThan(rootEntity.get("createdDate"), onDate);
+			}
+
+			Predicate finalPredicate = criteriaBuilder.and(titlePredicate, categoryPredicate, postedByPredicate,
+					dateCondationPredicate);
+			criteriaQuery.where(finalPredicate);
+			TypedQuery<AdvertisementEntity> query = entityManager.createQuery(criteriaQuery);
+			List<AdvertisementEntity> advertiseEntityList = query.getResultList();
+
+			
+			//advertiseDtoList = getAdvertiseDtoList_1(advertiseEntityList);
+			return getAdvertiseDtoList_1(advertiseEntityList);
+		}
+		throw new InvalidCategoryIdExeption("" + categoryId);
+
+//		if (advertiseDtoList.size() == 0)
+//			throw new InvalidCategoryIdExeption("" + categoryId);
+//		else
+//			return advertiseDtoList;
 	}
 
 	private boolean isCategoryExist(int categoryId) {
@@ -199,6 +275,7 @@ public class AdvertiseServiceImpl implements AdvertiseService {
 		throw new InvalidStatusIdExeption("" + statusId);
 	}
 
+	// This another way to implement filter with search criteria.
 	private List<Advertisement> getAdvertiseDtoListForFilterCriteria(List<AdvertisementEntity> advertiseEntitiesList,
 			String searchText, int categoryId, String username, String dateCondition, LocalDate onDate,
 			LocalDate fromDate, LocalDate toDate, String sortBy, int startIndex, int records) {
@@ -219,7 +296,7 @@ public class AdvertiseServiceImpl implements AdvertiseService {
 								searchText, categoryId);
 				advertiseDtoList = getAdvertiseDtoList(advertiseEntitieList);
 
-			} else if (dateCondition.equalsIgnoreCase("greatethan")) {
+			} else if (dateCondition.equalsIgnoreCase("greaterthan")) {
 				List<AdvertisementEntity> advertiseEntitieList = advertiseRepo
 						.findByCreatedDateGreaterThanAndUsernameAndTitleContainingAndCategory(fromDate, username,
 								searchText, categoryId);
@@ -240,23 +317,23 @@ public class AdvertiseServiceImpl implements AdvertiseService {
 	}
 
 	@Override
-	public List<Advertisement> searchAdvertiseByText(String searchText) {
+	public ResponseEntity<AdveriseData> searchAdvertiseByText(String searchText) {
 		// TODO Auto-generated method stub
 		List<AdvertisementEntity> advertiseEntities = advertiseRepo.findAll();
 		return getAdvertiseDtoListForSearch(advertiseEntities, searchText);
 	}
 
-	private List<Advertisement> getAdvertiseDtoListForSearch(List<AdvertisementEntity> advertiseEntitiesList,
+	private ResponseEntity<AdveriseData> getAdvertiseDtoListForSearch(List<AdvertisementEntity> advertiseEntitiesList,
 			String searchText) {
-		List<Advertisement> advertiseDtoList = new ArrayList<Advertisement>();
+		//List<Advertisement> advertiseDtoList = new ArrayList<Advertisement>();
 
 		List<AdvertisementEntity> advertiseEntitieList = advertiseRepo.findByText(searchText);
-		advertiseDtoList = getAdvertiseDtoList(advertiseEntitieList);
+		return getAdvertiseDtoList_1(advertiseEntitieList);
 
-		if (advertiseDtoList.size() == 0)
-			throw new InvalidRecordNoExeption();
-		else
-			return advertiseDtoList;
+//		if (advertiseDtoList.size() == 0)
+//			throw new InvalidRecordNoExeption();
+//		else
+//			return advertiseDtoList;
 
 	}
 

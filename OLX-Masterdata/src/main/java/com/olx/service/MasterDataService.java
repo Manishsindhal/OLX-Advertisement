@@ -1,16 +1,15 @@
 package com.olx.service;
 
 
-import java.util.List;
+import org.springframework.http.ResponseEntity;
 
-
-import com.olx.dto.Category;
-import com.olx.dto.Status;
+import com.olx.utility.MasterdataCategory;
+import com.olx.utility.MasterdataStatus;
 
 public interface MasterDataService {
 
-	public List<Category> getAllCategories();
+	public ResponseEntity<MasterdataCategory> getAllCategories();
 	
-	public List<Status> getAllStatus();
+	public ResponseEntity<MasterdataStatus> getAllStatus();
 	
 }

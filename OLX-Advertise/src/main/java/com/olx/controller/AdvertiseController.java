@@ -31,6 +31,7 @@ import org.springframework.web.context.request.WebRequest;
 import com.olx.dto.Advertisement;
 import com.olx.exception.InvalidAdvertiseIdExeption;
 import com.olx.service.AdvertiseService;
+import com.olx.utility.AdveriseData;
 
 import io.swagger.annotations.ApiOperation;
 
@@ -62,7 +63,7 @@ public class AdvertiseController {
 	@GetMapping(value = "/user/advertise", produces = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.APPLICATION_XML_VALUE })
 	@ApiOperation(value = "Returns All Advertisement")
-	public Collection<Advertisement> getAllAdvertisement(@RequestHeader("auth-token") String authToken) {
+	public ResponseEntity<AdveriseData> getAllAdvertisement(@RequestHeader("auth-token") String authToken) {
 		
 		return advertiseService.getAllAdvertisement(authToken);
 	}
@@ -85,7 +86,7 @@ public class AdvertiseController {
 	@GetMapping(value = "/advertise/search/filtercriteria", produces = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.APPLICATION_XML_VALUE })
 	@ApiOperation(value = "Search Advertise By Filter Criteria")
-	public @ResponseBody List<Advertisement> searchAdvertiseByFiltercriteria(@RequestParam("searchText") String searchText,
+	public @ResponseBody ResponseEntity<AdveriseData> searchAdvertiseByFiltercriteria(@RequestParam("searchText") String searchText,
 			@RequestParam(name = "category", required = false) int categoryId,
 			@RequestParam(name = "username", required = false) String username,
 			@RequestParam(name = "dateCondition", required = false) String dateCondition,
@@ -103,7 +104,7 @@ public class AdvertiseController {
 	@GetMapping(value = "/advertise/search", produces = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.APPLICATION_XML_VALUE })
 	@ApiOperation(value = "Search Advertise By SearchText(Keyword)")
-	public @ResponseBody List<Advertisement> searchAdvertiseByText(@RequestParam("searchText") String searchText) {
+	public @ResponseBody ResponseEntity<AdveriseData> searchAdvertiseByText(@RequestParam("searchText") String searchText) {
 
 		return advertiseService.searchAdvertiseByText(searchText);
 	}

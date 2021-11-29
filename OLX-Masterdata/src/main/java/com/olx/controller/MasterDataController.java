@@ -1,18 +1,15 @@
 package com.olx.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.olx.dto.Category;
-import com.olx.dto.Status;
 import com.olx.service.MasterDataService;
+import com.olx.utility.MasterdataCategory;
+import com.olx.utility.MasterdataStatus;
 
 import io.swagger.annotations.ApiOperation;
 
@@ -26,7 +23,7 @@ public class MasterDataController {
 	//This GET method is responsible for get all categories 
 	@GetMapping(value="/advertise/category", produces={MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 	@ApiOperation(value = "Returns All Categories")
-	public List<Category> getAllCategories() {
+	public ResponseEntity<MasterdataCategory> getAllCategories() {
 		
 		return masterDataService.getAllCategories();  
 	}
@@ -34,7 +31,7 @@ public class MasterDataController {
 	//This GET method is responsible for get all status
 	@GetMapping(value="/advertise/status", produces={MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 	@ApiOperation(value = "Returns All Status")
-	public List<Status> getAllStatus() {
+	public ResponseEntity<MasterdataStatus> getAllStatus() {
 		
 		return masterDataService.getAllStatus(); 
 	}

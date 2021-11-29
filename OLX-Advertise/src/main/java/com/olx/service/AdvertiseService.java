@@ -4,12 +4,14 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.olx.dto.Advertisement;
+import com.olx.utility.AdveriseData;
 
 
 public interface AdvertiseService {
@@ -20,7 +22,7 @@ public interface AdvertiseService {
 	public Advertisement updateAdvertiseById(@RequestHeader("auth-token") String authToken,
 			@PathVariable("id") int advertiseId, @RequestBody Advertisement newAdvertise);
 
-	public Collection<Advertisement> getAllAdvertisement(@RequestHeader("auth-token") String authToken);
+	public ResponseEntity<AdveriseData> getAllAdvertisement(@RequestHeader("auth-token") String authToken);
 
 	public Advertisement getAdvertiseById(@RequestHeader("auth-token") String authToken,
 			@PathVariable("id") int advertiseId);
@@ -28,11 +30,11 @@ public interface AdvertiseService {
 	public boolean deleteAdvertiseById(@RequestHeader("auth-token") String authToken,
 			@PathVariable("id") int advertiseId);
 
-	public List<Advertisement> searchAdvertiseByFiltercriteria(String searchText, int categoryId, String postedBy,
+	public ResponseEntity<AdveriseData> searchAdvertiseByFiltercriteria(String searchText, int categoryId, String postedBy,
 			String dateCondition, LocalDate onDate, LocalDate fromDate, LocalDate toDate, String sortBy, int startIndex,
 			int records);
 
-	public List<Advertisement> searchAdvertiseByText(@RequestParam("searchText") String searchText);
+	public ResponseEntity<AdveriseData> searchAdvertiseByText(@RequestParam("searchText") String searchText);
 
 	public Advertisement getAdvertiseDetailById(@RequestHeader("auth-token") String authToken,
 			@PathVariable("id") int advertiseId);

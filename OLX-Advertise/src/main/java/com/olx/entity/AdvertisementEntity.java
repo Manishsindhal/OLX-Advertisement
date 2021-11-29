@@ -32,10 +32,10 @@ public class AdvertisementEntity {
 	@Column(name = "description")
 	private String description;
 	
-	@Column(name = "createdDate")
+	@Column(name = "createdDate", nullable = true)
 	private LocalDate createdDate;
 	
-	@Column(name = "modifiedDate")
+	@Column(name = "modifiedDate", nullable = true)
 	private LocalDate modifiedDate;
 	
 	@Column(name = "active")
