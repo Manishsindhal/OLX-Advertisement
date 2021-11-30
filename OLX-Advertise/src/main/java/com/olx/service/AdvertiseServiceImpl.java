@@ -2,7 +2,6 @@ package com.olx.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,8 +27,8 @@ import com.olx.exception.InvalidAuthTokenExeption;
 import com.olx.exception.InvalidCategoryIdExeption;
 import com.olx.exception.InvalidRecordNoExeption;
 import com.olx.exception.InvalidStatusIdExeption;
+import com.olx.payload.AdveriseData;
 import com.olx.repo.AdvertiseRepo;
-import com.olx.utility.AdveriseData;
 
 @Service(value = "JPA_SERVICE")
 public class AdvertiseServiceImpl implements AdvertiseService {
@@ -48,7 +47,7 @@ public class AdvertiseServiceImpl implements AdvertiseService {
 
 	@Autowired
 	EntityManager entityManager;
-	
+
 	@Autowired
 	AdveriseData adveriseData;
 
@@ -123,23 +122,24 @@ public class AdvertiseServiceImpl implements AdvertiseService {
 			throw new InvalidAuthTokenExeption();
 		}
 	}
-	
+
+	/* This method is used for data conversion AdvertisementEntity -> Advertisement */
 	private ResponseEntity<AdveriseData> getAdvertiseDtoList_1(List<AdvertisementEntity> advertiseEntitiesList) {
 		List<Advertisement> advertiseDtoList = new ArrayList<Advertisement>();
 		for (AdvertisementEntity advertiseEntity : advertiseEntitiesList) {
 			Advertisement advertiseDto = this.modelMapper.map(advertiseEntity, Advertisement.class);
 			advertiseDtoList.add(advertiseDto);
 			adveriseData.setAdvertise(advertiseDtoList);
-			
+
 		}
 		if (advertiseDtoList.size() == 0)
 			throw new InvalidRecordNoExeption();
 		else
 			return new ResponseEntity<AdveriseData>(adveriseData, HttpStatus.OK);
-			//return advertiseDtoList;
+		// return advertiseDtoList;
 	}
-	
 
+	/* This method is used for data conversion like Entity -> DTO */
 	private List<Advertisement> getAdvertiseDtoList(List<AdvertisementEntity> advertiseEntitiesList) {
 		List<Advertisement> advertiseDtoList = new ArrayList<Advertisement>();
 		for (AdvertisementEntity advertiseEntity : advertiseEntitiesList) {
@@ -168,6 +168,7 @@ public class AdvertiseServiceImpl implements AdvertiseService {
 		}
 	}
 
+	/* This method is used for data conversion like Entity -> DTO */
 	private Advertisement getAdvertiseDTOFromEntity(AdvertisementEntity advertiseEntity) {
 		TypeMap<Advertisement, AdvertisementEntity> typeMap = this.modelMapper.typeMap(Advertisement.class,
 				AdvertisementEntity.class);
@@ -205,9 +206,9 @@ public class AdvertiseServiceImpl implements AdvertiseService {
 //	}
 
 	@Override
-	public ResponseEntity<AdveriseData> searchAdvertiseByFiltercriteria(String searchText, int categoryId, String postedBy,
-			String dateCondition, LocalDate onDate, LocalDate fromDate, LocalDate toDate, String sortedBy,
-			int startIndex, int records) {
+	public ResponseEntity<AdveriseData> searchAdvertiseByFiltercriteria(String searchText, int categoryId,
+			String postedBy, String dateCondition, LocalDate onDate, LocalDate fromDate, LocalDate toDate,
+			String sortedBy, int startIndex, int records) {
 		// call MasterData service getAllCategories() - RestTemplate
 		// List<Map> categoriesList = masterDataDelegate.getAllCategories();
 		List<Advertisement> advertiseDtoList = new ArrayList<Advertisement>();
@@ -235,10 +236,13 @@ public class AdvertiseServiceImpl implements AdvertiseService {
 					dateCondationPredicate);
 			criteriaQuery.where(finalPredicate);
 			TypedQuery<AdvertisementEntity> query = entityManager.createQuery(criteriaQuery);
+			
+//			query.setFirstResult(startIndex * records);
+//			query.setMaxResults(5);
+			
 			List<AdvertisementEntity> advertiseEntityList = query.getResultList();
 
-			
-			//advertiseDtoList = getAdvertiseDtoList_1(advertiseEntityList);
+			// advertiseDtoList = getAdvertiseDtoList_1(advertiseEntityList);
 			return getAdvertiseDtoList_1(advertiseEntityList);
 		}
 		throw new InvalidCategoryIdExeption("" + categoryId);
@@ -325,15 +329,10 @@ public class AdvertiseServiceImpl implements AdvertiseService {
 
 	private ResponseEntity<AdveriseData> getAdvertiseDtoListForSearch(List<AdvertisementEntity> advertiseEntitiesList,
 			String searchText) {
-		//List<Advertisement> advertiseDtoList = new ArrayList<Advertisement>();
+		// List<Advertisement> advertiseDtoList = new ArrayList<Advertisement>();
 
 		List<AdvertisementEntity> advertiseEntitieList = advertiseRepo.findByText(searchText);
 		return getAdvertiseDtoList_1(advertiseEntitieList);
-
-//		if (advertiseDtoList.size() == 0)
-//			throw new InvalidRecordNoExeption();
-//		else
-//			return advertiseDtoList;
 
 	}
 

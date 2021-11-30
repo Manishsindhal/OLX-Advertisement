@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.olx.dto.Advertisement;
-import com.olx.utility.AdveriseData;
+import com.olx.payload.AdveriseData;
 
 
 public interface AdvertiseService {

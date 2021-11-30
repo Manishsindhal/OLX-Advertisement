@@ -1,4 +1,4 @@
-package com.olx.utility;
+package com.olx.payload;
 
 import java.util.List;
 

@@ -30,8 +30,8 @@ import org.springframework.web.context.request.WebRequest;
 
 import com.olx.dto.Advertisement;
 import com.olx.exception.InvalidAdvertiseIdExeption;
+import com.olx.payload.AdveriseData;
 import com.olx.service.AdvertiseService;
-import com.olx.utility.AdveriseData;
 
 import io.swagger.annotations.ApiOperation;
 
