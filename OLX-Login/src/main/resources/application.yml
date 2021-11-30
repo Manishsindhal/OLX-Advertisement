@@ -19,6 +19,12 @@ spring:
    config:
     import: configserver:http://localhost:8888 
     
+   data:
+      mongodb:
+        host: localhost
+        port: 27017
+        database: olxtokendb 
+    
     
            
 eureka:

@@ -45,8 +45,8 @@ public class OlxLoginApplication {
 				.apiInfo(getApiInfo())
 				.select()
 				.apis(RequestHandlerSelectors.basePackage("com.olx"))
-				//.paths(PathSelectors.ant("/olx/user/**"))
-				.paths(PathSelectors.any())
+				.paths(PathSelectors.ant("/olx/user/**"))
+				//.paths(PathSelectors.any())
 				.build();
 		
 	}

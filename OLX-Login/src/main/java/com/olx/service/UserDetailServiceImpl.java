@@ -11,14 +11,11 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,8 +27,10 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.olx.dto.Users;
+import com.olx.entity.UserBlackListTokenDocument;
 import com.olx.entity.UserEntity;
 import com.olx.execption.InvalidAuthTokenExeption;
+import com.olx.repo.UserMongoRepo;
 import com.olx.repo.UserRepo;
 import com.olx.security.jwtUtil;
 
@@ -56,6 +55,9 @@ public class UserDetailServiceImpl implements UserService {
 	
 	@Autowired
 	ModelMapper modelMapper;
+	
+	@Autowired
+	UserMongoRepo userMongoRepo;
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -87,7 +89,25 @@ public class UserDetailServiceImpl implements UserService {
 			// TODO: handle exception
 			return new ResponseEntity<Boolean>(false, HttpStatus.BAD_REQUEST);
 		}
-		return new ResponseEntity<Boolean>(isTokenValid, HttpStatus.OK);
+		
+		List<UserBlackListTokenDocument> blackListTokenList = userMongoRepo.findAll();
+		if(hasToken(blackListTokenList, authToken)) {
+			throw new InvalidAuthTokenExeption();
+		} else {
+			return new ResponseEntity<Boolean>(isTokenValid, HttpStatus.OK);
+		}
+		
+		
+	}
+	
+	private boolean hasToken(List<UserBlackListTokenDocument> blackListTokenList, String authToken) {
+		
+		for (UserBlackListTokenDocument blackListTokenDocument : blackListTokenList) {
+			if(blackListTokenDocument.getToken().equalsIgnoreCase(authToken)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -118,20 +138,27 @@ public class UserDetailServiceImpl implements UserService {
 	@Override
 	public boolean logoutUser(String authToken) {
 		// TODO Auto-generated method stub
-		if (validateToken(authToken).getBody()) {
-			//SecurityContextHolder.getContext().setAuthentication(null);
-			HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
-			SecurityContextLogoutHandler securityContextLogoutHandler = new SecurityContextLogoutHandler();
-			securityContextLogoutHandler.logout(request, null, null);
-			if(securityContextLogoutHandler.isInvalidateHttpSession()) {
-				return true;
-			}
-			
-		} else {
-			throw new InvalidAuthTokenExeption();
-		}
-		return false;
+//		if (validateToken(authToken).getBody()) {
+//			//SecurityContextHolder.getContext().setAuthentication(null);
+//			HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
+//			SecurityContextLogoutHandler securityContextLogoutHandler = new SecurityContextLogoutHandler();
+//			securityContextLogoutHandler.logout(request, null, null);
+//			if(securityContextLogoutHandler.isInvalidateHttpSession()) {
+//				return true;
+//			}
+//			
+//		} else {
+//			throw new InvalidAuthTokenExeption();
+//		}
+//		return false;
+		
+		UserBlackListTokenDocument userBlackListTokenDocument = new UserBlackListTokenDocument();
+		userBlackListTokenDocument.setToken(authToken);
+		userMongoRepo.save(userBlackListTokenDocument);
+		return true;
 	}
+	
+	
 
 	@Override
 	public Users getUserDetails(String authToken) {
