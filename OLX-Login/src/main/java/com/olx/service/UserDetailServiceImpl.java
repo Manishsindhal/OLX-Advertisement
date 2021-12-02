@@ -100,6 +100,7 @@ public class UserDetailServiceImpl implements UserService {
 		
 	}
 	
+	//This method is used for check authToken in black listed token form the mongodb database 
 	private boolean hasToken(List<UserBlackListTokenDocument> blackListTokenList, String authToken) {
 		
 		for (UserBlackListTokenDocument blackListTokenDocument : blackListTokenList) {

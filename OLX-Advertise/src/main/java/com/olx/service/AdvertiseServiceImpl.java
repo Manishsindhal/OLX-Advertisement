@@ -211,7 +211,7 @@ public class AdvertiseServiceImpl implements AdvertiseService {
 			String sortedBy, int startIndex, int records) {
 		// call MasterData service getAllCategories() - RestTemplate
 		// List<Map> categoriesList = masterDataDelegate.getAllCategories();
-		List<Advertisement> advertiseDtoList = new ArrayList<Advertisement>();
+		//List<Advertisement> advertiseDtoList = new ArrayList<Advertisement>();
 		if (isCategoryExist(categoryId)) {
 			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 			CriteriaQuery<AdvertisementEntity> criteriaQuery = criteriaBuilder.createQuery(AdvertisementEntity.class);

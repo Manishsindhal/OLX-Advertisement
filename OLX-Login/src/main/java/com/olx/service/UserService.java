@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 import com.olx.dto.Users;
 
-public interface UserService extends UserDetailsService{
+public interface UserService extends UserDetailsService {
 
 	public ResponseEntity<Boolean> validateToken(@RequestHeader("Authorization") String authToken);
 	public ResponseEntity<String> authenticate(@RequestBody Users users);

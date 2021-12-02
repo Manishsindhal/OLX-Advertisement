@@ -37,34 +37,12 @@ public class UserController {
 	@GetMapping(value = "/user/validate/token")
 	@ApiOperation(value = "Validate token and return boolean value corrsponding")
 	public ResponseEntity<Boolean> validateToken(@RequestHeader("Authorization") String authToken) {
-//		boolean isTokenValid = false;
-//		try {
-//			String jwtToken = authToken.substring(7, authToken.length());
-//			String userName = jwtUtil.extractUsername(jwtToken);
-//			UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
-//			isTokenValid = jwtUtil.validateToken(jwtToken, userDetails);
-//		} catch (Exception e) {
-//			// TODO: handle exception
-//			return new ResponseEntity<Boolean>(false, HttpStatus.BAD_REQUEST);
-//		}
-//		return new ResponseEntity<Boolean>(isTokenValid, HttpStatus.OK);
 		return userService.validateToken(authToken);
 	}
 
 	@PostMapping(value = "/user/authenticate", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "User authenticatation and return token")
 	public ResponseEntity<String> authenticate(@RequestBody Users user) {
-//		try {
-//			this.authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-//					authenticationRequest.getUsername(), authenticationRequest.getPassword()));
-//		} catch (BadCredentialsException e) {
-//			// TODO: handle exception
-//			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
-//		}
-//		// Login Successful
-//		UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
-//		String jwtToken = jwtUtil.generateToken(userDetails);
-//		return new ResponseEntity<String>(jwtToken, HttpStatus.OK);
 		return userService.authenticate(user);
 	}
 	

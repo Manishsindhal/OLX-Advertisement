@@ -44,37 +44,37 @@ public class MasterDataServiceImpl implements MasterDataService {
 	MasterdataStatus masterdataStatus;
 
 	@Override
-	public ResponseEntity<MasterdataCategory> getAllCategories() {
+	public ResponseEntity<List<Category>> getAllCategories() {
 		// Collection<Map> adList = advertiseDelegate.getAllAdvertisement();
 
 		List<CategoryEntity> categoryEntities = masterdataCategoryRepo.findAll();
 		return getCategoryDtoList(categoryEntities);
 	}
 
-	private ResponseEntity<MasterdataCategory> getCategoryDtoList(List<CategoryEntity> categoryEntitiesList) {
+	private ResponseEntity<List<Category>> getCategoryDtoList(List<CategoryEntity> categoryEntitiesList) {
 		List<Category> categoryDtoList = new ArrayList<Category>();
 		for (CategoryEntity categoryEntity : categoryEntitiesList) {
 			Category categoryDto = this.modelMapper.map(categoryEntity, Category.class);
 			categoryDtoList.add(categoryDto);
-			masterdataCategory.setCategory(categoryDtoList);
+			//masterdataCategory.setCategory(categoryDtoList);
 		}
-		return new ResponseEntity<MasterdataCategory>(masterdataCategory, HttpStatus.OK);
+		return new ResponseEntity<List<Category>>(categoryDtoList, HttpStatus.OK);
 	}
 	
 	@Override
-	public ResponseEntity<MasterdataStatus> getAllStatus() {
+	public ResponseEntity<List<Status>> getAllStatus() {
 		List<StatusEntity> statusEntities = masterdataStatusRepo.findAll();
 		return getStatusDtoList(statusEntities);
 	}
 	
-	private ResponseEntity<MasterdataStatus> getStatusDtoList(List<StatusEntity> statusEntitiesList) {
+	private ResponseEntity<List<Status>> getStatusDtoList(List<StatusEntity> statusEntitiesList) {
 		List<Status> statusDtoList = new ArrayList<Status>();
 		for (StatusEntity statusEntity : statusEntitiesList) {
 			Status statusDto = this.modelMapper.map(statusEntity, Status.class);
 			statusDtoList.add(statusDto);
-			masterdataStatus.setStatus(statusDtoList);
+			//masterdataStatus.setStatus(statusDtoList);
 		}
-		return new ResponseEntity<MasterdataStatus>(masterdataStatus, HttpStatus.OK);
+		return new ResponseEntity<List<Status>>(statusDtoList, HttpStatus.OK);
 	}
 
 }
